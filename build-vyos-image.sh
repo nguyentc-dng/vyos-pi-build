@@ -27,7 +27,7 @@ cp ${ROOTDIR}/patches/vyos-build/arm64.toml ./data/architectures/arm64.toml
 
 # Build the image
 make clean
-export VYOS1X_REPO_URL=file:///${ROOTDIR}/vyos-build/scripts/package-build/vyos-1x/vyos-1x
+#export VYOS1X_REPO_URL=file:///${ROOTDIR}/vyos-build/scripts/package-build/vyos-1x/vyos-1x
 ./build-vyos-image rpi4 --architecture arm64 --build-by "${VYOS_BUILD_BY}" --build-type "${VYOS_BUILD_TYPE}"
 
 cd ${ROOTDIR}
