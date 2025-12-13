@@ -16,7 +16,7 @@ jobs:
         registry: docker.io
         image: tcnguyen/vyos-build:current-arm64
         shell: bash
-        options: -v ${{ github.workspace }}:/vyos -v /dev:/dev --sysctl net.ipv6.conf.lo.disable_ipv6=0 --sysctl net.ipv4.conf.lo.forwarding=1
+        options: --privileged -v ${{ github.workspace }}:/vyos -v /dev:/dev --sysctl net.ipv6.conf.lo.disable_ipv6=0 --sysctl net.ipv4.conf.lo.forwarding=1
         run: |
           bin/bash -c 'cd /vyos; /bin/bash -x build-all.sh'
           
