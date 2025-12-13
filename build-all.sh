@@ -26,21 +26,21 @@ DEVTREE="bcm2711-rpi-4-b"
 VYOS_BUILD_TYPE=${VYOS_BUILD_TYPE} ./prepare.sh
 
 # Build kernel for RPI
-./build-pi-kernel.sh
+#./build-pi-kernel.sh
 
 # Build custom packages for RPI4
 ./build-pi-packages.sh
 
 # Build VyOS RAW Image
-VYOS_BUILD_TYPE=${VYOS_BUILD_TYPE} VYOS_BUILD_BY=${VYOS_BUILD_BY} ./build-vyos-image.sh
+#VYOS_BUILD_TYPE=${VYOS_BUILD_TYPE} VYOS_BUILD_BY=${VYOS_BUILD_BY} ./build-vyos-image.sh
 
 # Build u-boot
 echo "Building u-boot for RPI${PIVERSION}"
-PIVERSION=${PIVERSION} ./build-u-boot.sh
+#PIVERSION=${PIVERSION} ./build-u-boot.sh
 
 # Generate RPI image from the iso
-VYOS_IMAGE=$(find ${ROOTDIR}/images/ -type f -name *.raw | head -n 1)
-DEVTREE=${DEVTREE} PIVERSION=${PIVERSION} ./build-pi-image.sh ${VYOS_IMAGE}
+#VYOS_IMAGE=$(find ${ROOTDIR}/images/ -type f -name *.raw | head -n 1)
+#DEVTREE=${DEVTREE} PIVERSION=${PIVERSION} ./build-pi-image.sh ${VYOS_IMAGE}
 
 # Clean up
 ./cleanup.sh
