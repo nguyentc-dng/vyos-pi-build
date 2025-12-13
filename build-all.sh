@@ -10,7 +10,8 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-export VYOS_BRANCH=$(git branch --show-current)
+#export VYOS_BRANCH=$(git branch --show-current)
+export VYOS_BRANCH="current"
 
 VYOS_BUILD_TYPE="release"
 VYOS_BUILD_BY="trancaonguyendn@gmail.com"
