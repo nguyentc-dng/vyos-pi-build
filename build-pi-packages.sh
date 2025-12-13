@@ -18,6 +18,7 @@ echo "Patch code Vyos-1.x for RPI4"
 cd ./vyos-1x 
 patch -p1 < $ROOTDIR/patches/vyos-1.x/vyos-1.x-rpi4-patches.diff
 git add .
+git config --global user.name "TCNGUYEN" && git config --global user.email "trancaonguyendn@gmail.com"
 git commit -m "Fix code for RPI"
 cd ../
 
