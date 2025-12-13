@@ -1,0 +1,282 @@
+diff --git a/data/templates/conserver/conserver.conf.j2 b/data/templates/conserver/conserver.conf.j2
+index ffd29389d..0bae0b831 100644
+--- a/data/templates/conserver/conserver.conf.j2
++++ b/data/templates/conserver/conserver.conf.j2
+@@ -17,7 +17,7 @@ default * {
+ ##
+ {% for key, value in device.items() %}
+ {#   Depending on our USB serial console we could require a path adjustment #}
+-{%     set path = '/dev' if key.startswith('ttyS') else '/dev/serial/by-bus' %}
++{%     set path = '/dev' if key.startswith('ttyS') or key.startswith('ttyAMA') else '/dev/serial/by-bus' %}
+ console {{ key }} {
+     master localhost;
+     type device;
+diff --git a/data/templates/grub/grub_common.j2 b/data/templates/grub/grub_common.j2
+index 5e9b95cc0..34671dd01 100644
+--- a/data/templates/grub/grub_common.j2
++++ b/data/templates/grub/grub_common.j2
+@@ -1,7 +1,6 @@
+ # load EFI video modules
+ if [ "${grub_platform}" == "efi" ]; then
+     insmod efi_gop
+-    insmod efi_uga
+ fi
+ 
+ # create and activate serial console
+@@ -13,6 +12,12 @@ function setup_serial {
+         else
+           serial --unit=${console_num} --speed=115200
+         fi
++    elif [ "${console_type}" == "ttyAMA" ]; then
++        if [ "${console_num}" == "0" ]; then
++          serial --unit=0 --speed=${console_speed}
++        else
++          serial --unit=${console_num} --speed=115200
++        fi
+     else
+         serial --unit=0 --speed=${console_speed}
+     fi
+diff --git a/data/templates/grub/grub_compat.j2 b/data/templates/grub/grub_compat.j2
+index 8fb4f71dc..a17c86e3b 100644
+--- a/data/templates/grub/grub_compat.j2
++++ b/data/templates/grub/grub_compat.j2
+@@ -13,7 +13,9 @@
+ {% if type == 'tty' -%}
+     KVM
+ {%- elif type == 'ttyS' -%}
+-    Serial
++    Serial ttyS0
++{%- elif type == 'ttyAMA' -%}
++    Serial ttyAMA0
+ {%- else -%}
+     Unknown
+ {%- endif %}
+@@ -23,6 +25,8 @@
+     console=ttyS0,{{ console_speed }} console=tty0
+ {%- elif type == 'ttyS' -%}
+     console=tty0 console=ttyS0,{{ console_speed }}
++{%- elif type == 'ttyAMA' -%}
++    console=tty0 console=ttyAMA0,{{ console_speed }}
+ {%- else -%}
+     console=tty0 console=ttyS0,{{ console_speed }}
+ {%- endif %}
+@@ -34,7 +38,7 @@
+ {%- endmacro %}
+ set default={{ default }}
+ set timeout={{ timeout }}
+-{% if console_type == 'ttyS' %}
++{% if console_type == 'ttyS' or console_type == 'ttyAMA' %}
+ {%     if console_num == '0' %}
+ serial --unit=0 --speed={{ console_speed }}
+ {%     else %}
+diff --git a/data/templates/grub/grub_options.j2 b/data/templates/grub/grub_options.j2
+index a00bf4e37..5e6d035f2 100644
+--- a/data/templates/grub/grub_options.j2
++++ b/data/templates/grub/grub_options.j2
+@@ -33,6 +33,12 @@ submenu "Boot options" {
+             setup_serial
+             configfile ${prefix}/grub.cfg.d/*vyos-menu*.cfg
+         }
++        menuentry "ttyAMA (serial)" {
++            set console_type="ttyAMA"
++            export console_type
++            setup_serial
++            configfile ${prefix}/grub.cfg.d/*vyos-menu*.cfg
++        }
+     }
+     menuentry "Enter console number" {
+         read console_num
+diff --git a/data/templates/grub/grub_vyos_version.j2 b/data/templates/grub/grub_vyos_version.j2
+index de85f1419..7158cdbca 100644
+--- a/data/templates/grub/grub_vyos_version.j2
++++ b/data/templates/grub/grub_vyos_version.j2
+@@ -13,6 +13,8 @@ menuentry "{{ version_name }}" --id {{ version_uuid }} {
+     set boot_opts="{{ boot_opts_rendered }}"
+     if [ "${console_type}" == "ttyS" ]; then
+         set console_opts="console=${console_type}${console_num},${console_speed}"
++    elif [ "${console_type}" == "ttyAMA" ]; then
++        set console_opts="console=${console_type}${console_num},${console_speed}"
+     else
+         set console_opts="console=${console_type}${console_num}"
+     fi
+diff --git a/interface-definitions/service_console-server.xml.in b/interface-definitions/service_console-server.xml.in
+index 68835dafd..25d8e4c6a 100644
+--- a/interface-definitions/service_console-server.xml.in
++++ b/interface-definitions/service_console-server.xml.in
+@@ -10,21 +10,25 @@
+         <children>
+           <tagNode name="device">
+             <properties>
+-              <help>System serial interface name (ttyS or ttyUSB)</help>
++              <help>System serial interface name (ttyS or ttyAMA or ttyUSB)</help>
+               <completionHelp>
+-                <script>ls -1 /dev | grep ttyS</script>
++                <script>ls -1 /dev | grep -e ttyS -e ttyAMA</script>
+                 <script>if [ -d /dev/serial/by-bus ]; then ls -1 /dev/serial/by-bus; fi</script>
+               </completionHelp>
+               <valueHelp>
+                 <format>ttySxxx</format>
+-                <description>Regular serial interface</description>
++                <description>Regular serial interface ttyS</description>
++              </valueHelp>
++              <valueHelp>
++                <format>ttyAMAxxx</format>
++                <description>Regular serial interface ttyAMA</description>
+               </valueHelp>
+               <valueHelp>
+                 <format>usbxbxpx</format>
+                 <description>USB based serial interface</description>
+               </valueHelp>
+               <constraint>
+-                <regex>(ttyS\d+|usb\d+b.*p.*)</regex>
++                <regex>(ttyS\d+|ttyAMA\d+|usb\d+b.*p.*)</regex>
+               </constraint>
+             </properties>
+             <children>
+diff --git a/interface-definitions/system_console.xml.in b/interface-definitions/system_console.xml.in
+index 5acd3e90b..23909356d 100644
+--- a/interface-definitions/system_console.xml.in
++++ b/interface-definitions/system_console.xml.in
+@@ -12,12 +12,16 @@
+             <properties>
+               <help>Serial console device name</help>
+               <completionHelp>
+-                <script>ls -1 /dev | grep -e ttyS -e hvc</script>
++                <script>ls -1 /dev | grep -e ttyS -e ttyAMA -e hvc</script>
+                 <script>if [ -d /dev/serial/by-bus ]; then ls -1 /dev/serial/by-bus; fi</script>
+               </completionHelp>
+               <valueHelp>
+                 <format>ttySN</format>
+-                <description>TTY device name, regular serial port</description>
++                <description>TTY device name ttySN, regular serial port ttyS</description>
++              </valueHelp>
++              <valueHelp>
++                <format>ttyAMAN</format>
++                <description>TTY device name ttyAMAN, regular serial port ttyAMA</description>
+               </valueHelp>
+               <valueHelp>
+                 <format>usbNbXpY</format>
+@@ -28,7 +32,7 @@
+                 <description>Xen console</description>
+               </valueHelp>
+               <constraint>
+-                  <regex>(ttyS[0-9]+|hvc[0-9]+|usb[0-9]+b.*)</regex>
++                  <regex>(ttyS[0-9]+|ttyAMA[0-9]+|hvc[0-9]+|usb[0-9]+b.*)</regex>
+               </constraint>
+             </properties>
+             <children>
+diff --git a/interface-definitions/system_lcd.xml.in b/interface-definitions/system_lcd.xml.in
+index 0cf4de308..03afe954a 100644
+--- a/interface-definitions/system_lcd.xml.in
++++ b/interface-definitions/system_lcd.xml.in
+@@ -47,19 +47,23 @@
+             <properties>
+               <help>Physical device used by LCD display</help>
+               <completionHelp>
+-                <script>ls -1 /dev | grep ttyS</script>
++                <script>ls -1 /dev | grep -e ttyS -e ttyAMA</script>
+                 <script>if [ -d /dev/serial/by-bus ]; then ls -1 /dev/serial/by-bus; fi</script>
+               </completionHelp>
+               <valueHelp>
+-                <format>ttySXX</format>
+-                <description>TTY device name, regular serial port</description>
++                <format>ttySxx</format>
++                <description>TTY device name ttySxx, regular serial port ttyS</description>
++              </valueHelp>
++              <valueHelp>
++                <format>ttyAMAxx</format>
++                <description>TTY device name ttyAMAxx, regular serial port ttyAMA</description>
+               </valueHelp>
+               <valueHelp>
+                 <format>usbNbXpY</format>
+                 <description>TTY device name, USB based</description>
+               </valueHelp>
+               <constraint>
+-                <regex>(ttyS[0-9]+|usb[0-9]+b.*)</regex>
++                <regex>(ttyS[0-9]+|ttyAMA[0-9]+|usb[0-9]+b.*)</regex>
+               </constraint>
+             </properties>
+           </leafNode>
+diff --git a/src/conf_mode/system_console.py b/src/conf_mode/system_console.py
+index fe910c1b0..19900346a 100755
+--- a/src/conf_mode/system_console.py
++++ b/src/conf_mode/system_console.py
+@@ -115,11 +115,12 @@ def generate(console):
+     # GRUB
+     # For existing serial line change speed (if necessary)
+     # Only applys to ttyS0
+-    if 'ttyS0' not in console['device']:
+-        return None
+-
+-    speed = console['device']['ttyS0']['speed']
+-    grub_util.update_console_speed(speed)
++    if 'ttyS0' in console['device']:
++        speed = console['device']['ttyS0']['speed']
++        grub_util.update_console_speed(speed)
++    elif 'ttyAMA' in console['device']:
++        speed = console['device']['ttyS0']['speed']
++        grub_util.update_console_speed(speed)
+ 
+     return None
+ 
+diff --git a/src/etc/securetty b/src/etc/securetty
+index 17d8610a0..6c9003747 100644
+--- a/src/etc/securetty
++++ b/src/etc/securetty
+@@ -2,10 +2,14 @@
+ # See securetty(5) and login(1).
+ console
+ 
+-# Standard serial ports
++# Standard serial ports ttS
+ ttyS0
+ ttyS1
+ 
++# Standard serial ports ttAMA
++ttyAMA0
++ttyAMA1
++
+ # USB dongles
+ ttyUSB0
+ ttyUSB1
+diff --git a/src/etc/udev/rules.d/99-vyos-systemd.rules b/src/etc/udev/rules.d/99-vyos-systemd.rules
+index 54aea668c..394bbc09b 100644
+--- a/src/etc/udev/rules.d/99-vyos-systemd.rules
++++ b/src/etc/udev/rules.d/99-vyos-systemd.rules
+@@ -3,7 +3,7 @@
+ 
+ ACTION=="remove", GOTO="systemd_end"
+ 
+-SUBSYSTEM=="tty", KERNEL=="tty[a-zA-Z]*|hvc*|xvc*|hvsi*|ttysclp*|sclp_line*|3270/tty[0-9]*", TAG+="systemd"
++SUBSYSTEM=="tty", KERNEL=="tty[a-zA-Z]*|ttyAMA*|hvc*|xvc*|hvsi*|ttysclp*|sclp_line*|3270/tty[0-9]*", TAG+="systemd"
+ KERNEL=="vport*", TAG+="systemd"
+ 
+ SUBSYSTEM=="ptp", TAG+="systemd"
+diff --git a/src/op_mode/image_installer.py b/src/op_mode/image_installer.py
+index 9e2009a0a..49579ab2d 100755
+--- a/src/op_mode/image_installer.py
++++ b/src/op_mode/image_installer.py
+@@ -906,8 +906,8 @@ def install_image() -> None:
+     # ask for default console
+     console_type: str = ask_input(MSG_INPUT_CONSOLE_TYPE,
+                                   default=console_hint(),
+-                                  valid_responses=['K', 'S'])
+-    console_dict: dict[str, str] = {'K': 'tty', 'S': 'ttyS'}
++                                  valid_responses=['K', 'S', 'A'])
++    console_dict: dict[str, str] = {'K': 'tty', 'S': 'ttyS', 'A': 'ttyAMA'}
+ 
+     config_boot_list = [f'{DIR_CONFIG}/config.boot',
+                         '/opt/vyatta/etc/config.boot.default']
+diff --git a/src/op_mode/image_manager.py b/src/op_mode/image_manager.py
+index 40668793e..985db96dd 100755
+--- a/src/op_mode/image_manager.py
++++ b/src/op_mode/image_manager.py
+@@ -33,7 +33,7 @@
+ MSG_DELETE_IMAGE_RUNNING: str = 'Currently running image cannot be deleted; reboot into another image first'
+ MSG_DELETE_IMAGE_DEFAULT: str = 'Default image cannot be deleted; set another image as default first'
+ 
+-ConsoleType: TypeAlias = Literal['tty', 'ttyS']
++ConsoleType: TypeAlias = Literal['tty', 'ttyS', 'ttyAMA']
+ 
+ def annotate_list(images_list: list[str]) -> list[str]:
+     """Annotate list of images with additional info
