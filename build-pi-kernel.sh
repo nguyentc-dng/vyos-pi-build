@@ -19,8 +19,8 @@ echo "Build kernel for pi (${KERNEL_BRANCH_NAME})"
 # Clone kernel repo
 rm -rf linux/
 #git clone -b ${KERNEL_BRANCH_NAME} ${KERNEL_REPO}
-wget https://github.com/raspberrypi/linux/archive/refs/heads/${KERNEL_BRANCH_NAME}.zip
-unzip ${KERNEL_BRANCH_NAME}.zip && rm ${KERNEL_BRANCH_NAME}.zip
+wget -nv https://github.com/raspberrypi/linux/archive/refs/heads/${KERNEL_BRANCH_NAME}.zip
+unzip -q ${KERNEL_BRANCH_NAME}.zip && rm ${KERNEL_BRANCH_NAME}.zip
 mv linux-${KERNEL_BRANCH_NAME}/ linux/
 
 # Patch vyos-build config
