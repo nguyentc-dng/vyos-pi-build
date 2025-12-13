@@ -27,6 +27,7 @@ echo "Build Vyos-1.x"
 rm -rf /usr/lib/libvyosconfig.so.0
 if [ ! -f /.dockerenv ]; then
     sysctl -w net.ipv4.conf.lo.forwarding=1
+    sysctl -w net.ipv6.conf.lo.disable_ipv6=0
 fi
 ./build.py
 find . -maxdepth 1 -type f -name "*.deb" | grep -E "^(./)?(libvyosconfig0_|vyos-1x_)" | xargs cp -t $ROOTDIR/packages
