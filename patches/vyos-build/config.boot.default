@@ -1,0 +1,44 @@
+system {
+    host-name VyPiOS
+    login {
+        user vyos {
+            authentication {
+                encrypted-password $6$QxPS.uk6mfo$9QBSo8u1FkH16gMyAVhus6fU3LOzvLR9Z9.82m3tiHFAxTtIkhaZSWssSgzt4v4dGAL8rhVQxTg0oAG9/q11h/
+                plaintext-password ""
+            }
+        }
+    }
+    syslog {
+        global {
+            facility all {
+                level info
+            }
+            facility protocols {
+                level debug
+            }
+        }
+    }
+    ntp {
+        server "0.pool.ntp.org"
+        server "1.pool.ntp.org"
+        server "2.pool.ntp.org"
+    }
+    console {
+        device ttyAMA0 {
+            speed 115200
+        }
+    }
+}
+
+interfaces {
+    loopback lo {
+    }
+    ethernet eth0 {
+        address dhcp
+    }
+}
+
+service {
+    ssh {                                        
+    }
+}

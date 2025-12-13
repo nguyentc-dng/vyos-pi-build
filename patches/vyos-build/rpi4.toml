@@ -1,0 +1,11 @@
+# Generic (aka "universal") IMG image for RPI4-B
+
+image_format = "raw"
+disk_size = 2
+
+[boot_settings]
+timeout = "5"
+console_type = "ttyAMA"
+console_num = "0"
+console_speed = "115200"
+bootmode = "normal"
