@@ -15,10 +15,10 @@ jobs:
       uses: kota65535/github-git-config-action@v1
       with:
         scope: global
-        user.name: Tran Cao Nguyen
-        user.email: trancaonguyendn@gmail.com
+        user.name: "Tran Cao Nguyen"
+        user.email: "trancaonguyendn@gmail.com"
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        
+
     - uses: addnab/docker-run-action@v3
       with:
         registry: docker.io
