@@ -26,10 +26,10 @@ DEVTREE="bcm2711-rpi-4-b"
 VYOS_BUILD_TYPE=${VYOS_BUILD_TYPE} ./prepare.sh
 
 # Build kernel for RPI
-#./build-pi-kernel.sh
+./build-pi-kernel.sh
 
 # Build custom packages for RPI4
-#./build-pi-packages.sh
+./build-pi-packages.sh
 
 # Build VyOS RAW Image
 VYOS_BUILD_TYPE=${VYOS_BUILD_TYPE} VYOS_BUILD_BY=${VYOS_BUILD_BY} ./build-vyos-image.sh
