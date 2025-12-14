@@ -3,7 +3,7 @@
 set -x
 set -e
 ROOTDIR=$(pwd)
-OCAML_VERSION=4.14.2
+export OCAML_VERSION=4.14.2
 
 # Check root user
 if [ "$EUID" -ne 0 ]; then
