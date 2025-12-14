@@ -80,7 +80,7 @@ mount ${IMGLOOP}p2 ${EFIDIR}
 # Copy rpi firmware files
 echo "Downloading PI Boot files"
 if [ "${PIVERSION}" == "4" ]; then
-    cp -r $/patches/u-boot/fixup4.dat ${EFIDIR}/
+    cp -r ${ROOTDIR}/patches/u-boot/fixup4.dat ${EFIDIR}/
     cp -r ${ROOTDIR}/patches/u-boot/start4.elf ${EFIDIR}/
     cp -r ${ROOTDIR}/patches/u-boot/dts/overlays ${EFIDIR}/ 
 elif [ "${PIVERSION}" == "3" ]; then
