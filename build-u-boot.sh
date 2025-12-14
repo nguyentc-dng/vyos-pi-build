@@ -21,10 +21,10 @@ make -s rpi_${PIVERSION}_defconfig
 make -s -j $(getconf _NPROCESSORS_ONLN)
 
 # Copy built u-boot bin
-mv ./u-boot/u-boot.bin ./packages/u-boot-rpi${PIVERSION}.bin
-
-# Clean
-rm -rf ./u-boot/
+mv ./u-boot.bin ${ROOTDIR}/packages/u-boot-rpi${PIVERSION}.bin
 
 # Return to ROOTDIR
 cd ${ROOTDIR}
+
+# Clean
+rm -rf ./u-boot/
