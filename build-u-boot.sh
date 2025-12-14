@@ -13,6 +13,7 @@ else
 fi
 
 (
+    sudo apt update && sudo apt install libgnutls28-dev
     cd u-boot
     echo "Configuring u-boot for PI${PIVERSION}"
     make -s rpi_${PIVERSION}_defconfig 
