@@ -23,7 +23,7 @@ sed -i "s/build_type\ =.*/build_type\ =\ \"${VYOS_BUILD_TYPE}\"/g" ${ROOTDIR}/vy
 
 # Clone RPI kernel and patch for VyOS 
 cd ${ROOTDIR}/vyos-build/scripts/package-build/linux-kernel/
-KERNEL_BRANCH_NAME=rpi-$(sed -n -e 's/^kernel_version = "\([^.]\+\.[^.]\+\)\..\+"$/\1/p' vyos-build/data/defaults.toml).y
+KERNEL_BRANCH_NAME=rpi-$(sed -n -e 's/^kernel_version = "\([^.]\+\.[^.]\+\)\..\+"$/\1/p' ${ROOTDIR}/vyos-build/data/defaults.toml).y
 echo "Download and patch Linux kernel for RPI "
 rm -rf *.deb *.zip ./linux/
 wget -nv https://github.com/raspberrypi/linux/archive/refs/heads/${KERNEL_BRANCH_NAME}.zip
