@@ -90,7 +90,9 @@ jobs:
           asset_path: ${{ steps.find_file.outputs.file_path }}
           asset_name: ${{ steps.find_file.outputs.release_name }}.zip
           asset_content_type: application/zip
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Clean up
         run: |
           cd $GITHUB_WORKSPACE
