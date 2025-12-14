@@ -32,7 +32,7 @@ mv linux-${KERNEL_BRANCH_NAME}/ linux/
 cd ./linux && KERNEL_VERSION=$(make kernelversion) && cd ../
 sed -i "s/kernel_version\ =.*/kernel_version\ =\ \"${KERNEL_VERSION}\"/g" ${ROOTDIR}/vyos-build/data/defaults.toml
 sed -i "s/kernel_flavor\ =.*/kernel_flavor\ =\ \"vyos-rpi\"/g" ${ROOTDIR}/vyos-build/data/defaults.toml
-cp ${ROOTDIR}/patches/linux-kernel/config-vyos-rpi arch/arm64/configs/vyos_defconfig
+cp ${ROOTDIR}/patches/linux-kernel/config-vyos-rpi ./arch/arm64/configs/vyos_defconfig
 
 # Clone and patch VyOS-1.x code for RPI
 cd ${ROOTDIR}/vyos-build/scripts/package-build/vyos-1x/

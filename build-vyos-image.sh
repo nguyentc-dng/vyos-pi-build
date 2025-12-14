@@ -26,7 +26,7 @@ export VYOS1X_REPO_URL=file:///${ROOTDIR}/vyos-build/scripts/package-build/vyos-
 ./build-vyos-image rpi4 --architecture arm64 --build-by "${VYOS_BUILD_BY}" --build-type "${VYOS_BUILD_TYPE}"
 
 # Copy RAW image to images directory
-RAW_IMAGE=$(find ./vyos-build/build/ -type f -name *.raw | head -n 1)
+RAW_IMAGE=$(find ./ -type f -name *.raw | head -n 1)
 if [ ! -e ${RAW_IMAGE} ]; then
 	echo "File ${RAW_IMAGE} not exists."
 	exit -1

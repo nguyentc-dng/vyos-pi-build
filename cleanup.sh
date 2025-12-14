@@ -11,4 +11,3 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 rm -rf ${ROOTDIR}/vyos-build/
-rm -rf ${ROOTDIR}/u-boot/
