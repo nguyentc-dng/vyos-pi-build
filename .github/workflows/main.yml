@@ -1,10 +1,11 @@
-name: Build VyOS image for RPI-4-B
+name: Build VyOS image for RPI
 
 on:
   workflow_dispatch:
     
 jobs:
-  run-manually:
+  build:
+    name: Build VyOS image for RPI4 Model B
     runs-on: ubuntu-24.04-arm
 
     container:
