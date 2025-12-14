@@ -32,8 +32,8 @@ crash_cleanup() {
     echo "OOOPS!!! we crashed.. :/ starting a crude cleanup."
     if [ ! -z "$IMGLOOP" ]; then
         echo "IMGLOOP : ${IMGLOOP}"
-        echo "Unmounting ISO"
-        umount ${IMGLOOP} || true
+        echo "Unmounting IMGLOOP"
+        umount ${IMGLOOP}p2 || true
         losetup -d ${IMGLOOP} || true
     fi
 }
@@ -52,9 +52,9 @@ fi
 
 if [ -f "${UBOOTBIN}" ]; then
     echo "Using uboot from ${UBOOTBIN}"
-elif [ -f "./packages/u-boot-rpi${PIVERSION}.bin" ]; then
-    echo "Using uboot from ./packages/u-boot-rpi${PIVERSION}.bin"
-    UBOOTBIN="./packages/u-boot-rpi${PIVERSION}.bin"
+elif [ -f "${ROOTDIR}/packages/u-boot-rpi${PIVERSION}.bin" ]; then
+    echo "Using uboot from ${ROOTDIR}/packages/u-boot-rpi${PIVERSION}.bin"
+    UBOOTBIN="${ROOTDIR}/packages/u-boot-rpi${PIVERSION}.bin"
 else
     1>&2 echo "ERROR: u-boot.bin not found and UBOOTBIN env variable is not set"
     exit 1
