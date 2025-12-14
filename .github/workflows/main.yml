@@ -2,7 +2,10 @@ name: Build VyOS image for RPI
 
 on:
   workflow_dispatch:
-    
+
+permissions:
+  contents: write
+  
 jobs:
   build:
     name: Build VyOS image for RPI4 Model B
