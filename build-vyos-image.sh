@@ -4,6 +4,12 @@ set -x
 set -e
 ROOTDIR=$(pwd)
 
+# Check root user
+if [ "$EUID" -ne 0 ]; then
+    echo "❌ERROR: You must run script with root privileges!"
+    exit 1
+fi
+
 # Copy prebuilt package
 echo "Copy prebuilt packages"
 rm -rf vyos-build/packages/*
@@ -12,32 +18,24 @@ for a in $(find ./packages/ -type f -name "*.deb" | grep -v -e "-dbgsym_" -e "li
 	cp $a ./vyos-build/packages/
 done
 
-cd vyos-build
-
-#copy default config
-echo "Copy new default configuration to the vyos image"
-cp ${ROOTDIR}/patches/vyos-build/config.boot.default ./data/live-build-config/includes.chroot/opt/vyatta/etc/config.boot.default
-
-# Copy build flavor for RPI4
-echo "Copy build-flavor file for RPI4"
-cp ${ROOTDIR}/patches/vyos-build/rpi4.toml ./data/build-flavors/rpi4.toml
-
-# Patch arm64.toml for openvpn-dco and telegraf
-cp ${ROOTDIR}/patches/vyos-build/arm64.toml ./data/architectures/arm64.toml
-
-# Build the image
+# Build VyOS RAW image
+echo "Copy prebuilt packages"
+cd ${ROOTDIR}/vyos-build
 make clean
 export VYOS1X_REPO_URL=file:///${ROOTDIR}/vyos-build/scripts/package-build/vyos-1x/vyos-1x
 ./build-vyos-image rpi4 --architecture arm64 --build-by "${VYOS_BUILD_BY}" --build-type "${VYOS_BUILD_TYPE}"
 
-cd ${ROOTDIR}
-
-# Check ISO file
-LIVE_IMAGE=$(find ./vyos-build/build/ -type f -name *.raw | head -n 1)
-
-if [ ! -e ${LIVE_IMAGE} ]; then
-	echo "File ${LIVE_IMAGE} not exists."
+# Copy RAW image to images directory
+RAW_IMAGE=$(find ./vyos-build/build/ -type f -name *.raw | head -n 1)
+if [ ! -e ${RAW_IMAGE} ]; then
+	echo "File ${RAW_IMAGE} not exists."
 	exit -1
 else
-	cp ${LIVE_IMAGE} ${ROOTDIR}/images/
+	cp ${RAW_IMAGE} ${ROOTDIR}/images/
 fi
+
+# Clean built directory
+rm -rf ./build/
+
+# Return to ROOTDIR
+cd ${ROOTDIR}

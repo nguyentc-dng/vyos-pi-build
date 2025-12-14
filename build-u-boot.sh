@@ -5,25 +5,23 @@ fi
 set -e
 ROOTDIR=$(pwd)
 
-if [ ! -d "u-boot" ]; then
-    git clone --depth=1 git://git.denx.de/u-boot.git
-else
-    echo "Using existing u-boot repository"
-    EXIST="yes"
+# Check root user
+if [ "$EUID" -ne 0 ]; then
+    echo "❌ERROR: You must run script with root privileges!"
+    exit 1
 fi
 
-(
-    sudo apt update && sudo apt install libgnutls28-dev
-    cd u-boot
-    echo "Configuring u-boot for PI${PIVERSION}"
-    make -s rpi_${PIVERSION}_defconfig 
-    echo "Building u-boot for PI${PIVERSION}"
-    make -s -j $(getconf _NPROCESSORS_ONLN)
-)
+# Install require package 
+sudo apt update && sudo apt install -y libgnutls28-dev
 
+# build u-boot
+echo "Building u-boot for PI${PIVERSION}"
+cd u-boot
+make -s rpi_${PIVERSION}_defconfig 
+make -s -j $(getconf _NPROCESSORS_ONLN)
+
+# Copy built u-boot bin
 mv ./u-boot/u-boot.bin ./packages/u-boot-rpi${PIVERSION}.bin
 
-if [ -z "${EXIST}" ]; then
-    echo "Cleaning up"
-    rm -rf u-boot
-fi
+# Return to ROOTDIR
+cd ${ROOTDIR}

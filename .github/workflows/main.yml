@@ -7,41 +7,94 @@ jobs:
   run-manually:
     runs-on: ubuntu-24.04-arm
 
-    steps:    
-    - name: Checkout 
-      uses: actions/checkout@v4
+    container:
+      image: tcnguyen/vyos-build:current-arm64
+      options: >
+        --privileged
+        -v /dev:/dev
+        --sysctl net.ipv6.conf.lo.disable_ipv6=0
+        --sysctl net.ipv4.conf.lo.forwarding=1
+    env:
+      VYOS_BRANCH: ${{ github.ref_name }}
+      VYOS_BUILD_TYPE: release
+      VYOS_BUILD_BY: trancaonguyendn@gmail.com
+      PIVERSION: 4
+      DEVTREE: bcm2711-rpi-4-b
 
-    - name: Build Vyos image for RPI4
-      run: sudo docker run --rm -t --privileged -v ${{ github.workspace }}:/vyos -v /dev:/dev --sysctl net.ipv6.conf.lo.disable_ipv6=0 --sysctl net.ipv4.conf.lo.forwarding=1 tcnguyen/vyos-build:current-arm64 bin/bash -c 'cd /vyos; /bin/bash -x build-all.sh'
-          
-    - name: Find image file
-      id: find_file
-      run: |
-        FILE=$(ls images/*.zip | head -n 1)
-        BASENAME=$(basename "$FILE" .zip)
-        echo "file_path=$FILE" >> $GITHUB_OUTPUT
-        echo "release_name=$BASENAME" >> $GITHUB_OUTPUT
+    steps:
+      - name: Checkout build source
+        uses: actions/checkout@v4
 
-    - name: Show release info
-      run: |
-        echo "File path: ${{ steps.find_file.outputs.file_path }}"
-        echo "Release name: ${{ steps.find_file.outputs.release_name }}"
+      - name: Prepare VyOS-build enviroment
+        run: |
+          cd $GITHUB_WORKSPACE
+          /bin/bash -x prepare.sh
 
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      with:
-        tag_name: ${{ steps.find_file.outputs.release_name }}
-        release_name: ${{ steps.find_file.outputs.release_name }}
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build custom RPI kernel for VyOS
+        run: |
+          cd $GITHUB_WORKSPACE
+          /bin/bash -x build-pi-kernel.sh
 
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ steps.find_file.outputs.file_path }}
-        asset_name: ${{ steps.find_file.outputs.release_name }}.zip
-        asset_content_type: application/zip
+      - name: Build custom RPI packages for VyOS
+        run: |
+          cd $GITHUB_WORKSPACE
+          /bin/bash -x build-pi-packages.sh
+
+      - name: Build VyOS RAW images for PRI
+        run: |
+          cd $GITHUB_WORKSPACE
+          /bin/bash -x build-vyos-image.sh
+
+      - name: Build U-Boot for PRI
+        run: |
+          cd $GITHUB_WORKSPACE
+          /bin/bash -x build-u-boot.sh
+
+      - name: Build PRI image 
+        run: |
+          cd $GITHUB_WORKSPACE
+          /bin/bash -x build-pi-image.sh
+
+      - name: Find image file
+        id: find_file
+        run: |
+          FILE=$(ls images/*.zip | head -n 1)
+          BASENAME=$(basename "$FILE" .zip)
+          echo "file_path=$FILE" >> $GITHUB_OUTPUT
+          echo "release_name=$BASENAME" >> $GITHUB_OUTPUT
+
+      - name: Show release info
+        run: |
+          echo "File path: ${{ steps.find_file.outputs.file_path }}"
+          echo "Release name: ${{ steps.find_file.outputs.release_name }}"
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.find_file.outputs.release_name }}
+          release_name: ${{ steps.find_file.outputs.release_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ steps.find_file.outputs.file_path }}
+          asset_name: ${{ steps.find_file.outputs.release_name }}.zip
+          asset_content_type: application/zip
+
+      - name: Clean up
+        run: |
+          cd $GITHUB_WORKSPACE
+          /bin/bash -x ./cleanup.sh
+
+
+
+
+
+
+
