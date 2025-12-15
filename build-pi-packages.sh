@@ -11,9 +11,9 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Build vyos-1.x for RPI4
+# Build vyos-1x for RPI4
 cd ${ROOTDIR}/vyos-build/scripts/package-build/vyos-1x/
-echo "Building Vyos-1.x"
+echo "Building Vyos-1x"
 rm -rf /usr/lib/libvyosconfig.so.0
 if [ ! -f /.dockerenv ]; then
     sysctl -w net.ipv4.conf.lo.forwarding=1
