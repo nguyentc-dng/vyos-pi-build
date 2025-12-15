@@ -39,13 +39,6 @@ crash_cleanup() {
 }
 trap "crash_cleanup" ERR
 
-
-# Check root user
-if [ "$EUID" -ne 0 ]; then
-    echo "❌ERROR: You must run script with root privileges!"
-    exit 1
-fi
-
 if [ -f "${PIVERSION}" ]; then
 	PIVERSION=4
 fi

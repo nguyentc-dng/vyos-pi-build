@@ -20,13 +20,17 @@ if [ ! -f /.dockerenv ]; then
     sysctl -w net.ipv6.conf.lo.disable_ipv6=0
 fi
 ./build.py
-find . -maxdepth 1 -type f -name "*.deb" | grep -E "^(./)?(libvyosconfig0_|vyos-1x_)" | xargs cp -t $ROOTDIR/packages
+find ${ROOTDIR}/vyos-build/scripts/package-build/vyos-1x/ -maxdepth 1 -type f -name "*.deb" | \
+    grep -E "^(./)?(libvyosconfig0_|vyos-1x_)" | \
+    xargs cp -t $ROOTDIR/packages
 
 # Build telegraf for RPI4
-cd ${ROOTDIR}/vyos-build/scripts/package-build/telegraf
+cd ${ROOTDIR}/vyos-build/scripts/package-build/telegraf/
 rm -rf telegraf
 ./build.py
-find . -maxdepth 1 -type f -name "*.deb" | grep -E "^(./)?(telegraf_)" | xargs cp -t $ROOTDIR/packages
+find ${ROOTDIR}/vyos-build/scripts/package-build/telegraf/ -maxdepth 1 -type f -name "*.deb" | \
+    grep -E "^(./)?(telegraf_)" | \
+    xargs cp -t $ROOTDIR/packages
 
 # Return to ROOTDIR
 cd ${ROOTDIR}

@@ -12,10 +12,10 @@ fi
 
 # Copy prebuilt package
 echo "Copy prebuilt packages"
-rm -rf vyos-build/packages/*
-for a in $(find ./packages/ -type f -name "*.deb" | grep -v -e "-dbgsym_" -e "libnetfilter-conntrack3-dbg"); do
+rm -rf ${ROOTDIR}/vyos-build/packages/*
+for a in $(find ${ROOTDIR}/packages/ -type f -name "*.deb" | grep -v -e "-dbgsym_" -e "libnetfilter-conntrack3-dbg"); do
 	echo "Copying package: $a"
-	cp $a ./vyos-build/packages/
+	cp $a ${ROOTDIR}/vyos-build/packages/
 done
 
 # Build VyOS RAW image
@@ -26,7 +26,7 @@ export VYOS1X_REPO_URL=file:///${ROOTDIR}/vyos-build/scripts/package-build/vyos-
 ./build-vyos-image rpi4 --architecture arm64 --build-by "${VYOS_BUILD_BY}" --build-type "${VYOS_BUILD_TYPE}"
 
 # Copy RAW image to images directory
-RAW_IMAGE=$(find ./ -type f -name *.raw | head -n 1)
+RAW_IMAGE=$(find ${ROOTDIR}/vyos-build/build/ -type f -name *.raw | head -n 1)
 if [ ! -e ${RAW_IMAGE} ]; then
 	echo "File ${RAW_IMAGE} not exists."
 	exit -1
@@ -34,8 +34,8 @@ else
 	cp ${RAW_IMAGE} ${ROOTDIR}/images/
 fi
 
-# Clean built directory
-rm -rf ./build/
-
 # Return to ROOTDIR
 cd ${ROOTDIR}
+
+# Clean built directory
+rm -rf ${ROOTDIR}/vyos-build/build/
