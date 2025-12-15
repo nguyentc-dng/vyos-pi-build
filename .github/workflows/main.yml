@@ -63,7 +63,7 @@ jobs:
         id: find_file
         run: |
           FILE=$(ls images/*.zip | head -n 1)
-          BASENAME=$(basename "$FILE" .zip)
+          BASENAME=$(basename "$FILE" .raw.zip)
           echo "file_path=$FILE" >> $GITHUB_OUTPUT
           echo "release_name=$BASENAME" >> $GITHUB_OUTPUT
 
@@ -88,7 +88,7 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ steps.find_file.outputs.file_path }}
-          asset_name: ${{ steps.find_file.outputs.release_name }}.zip
+          asset_name: ${{ steps.find_file.outputs.release_name }}.raw.zip
           asset_content_type: application/zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -97,10 +97,3 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE
           /bin/bash -x ./cleanup.sh
-
-
-
-
-
-
-
