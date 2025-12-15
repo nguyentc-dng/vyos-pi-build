@@ -22,15 +22,15 @@ fi
 ./build.py
 find ${ROOTDIR}/vyos-build/scripts/package-build/vyos-1x/ -maxdepth 1 -type f -name "*.deb" | \
     grep -E "^(./)?(libvyosconfig0_|vyos-1x_)" | \
-    xargs cp -t $ROOTDIR/packages
-
+    xargs -I {} cp {} ${ROOTDIR}/packages/
+    
 # Build telegraf for RPI4
 cd ${ROOTDIR}/vyos-build/scripts/package-build/telegraf/
 rm -rf telegraf
 ./build.py
 find ${ROOTDIR}/vyos-build/scripts/package-build/telegraf/ -maxdepth 1 -type f -name "*.deb" | \
     grep -E "^(./)?(telegraf_)" | \
-    xargs cp -t $ROOTDIR/packages
+    xargs -I {} cp {} ${ROOTDIR}/packages/
 
 # Return to ROOTDIR
 cd ${ROOTDIR}
