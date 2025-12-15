@@ -280,3 +280,15 @@ index 40668793e..985db96dd 100755
  
  def annotate_list(images_list: list[str]) -> list[str]:
      """Annotate list of images with additional info
+diff --git a/src/udev/vyos_net_name b/src/udev/vyos_net_name
+index 6ad7af2d6..81db7fec2 100755
+--- a/src/udev/vyos_net_name
++++ b/src/udev/vyos_net_name
+@@ -62,7 +62,7 @@ def mod_ifname(ifname: str) -> str:
+         intf = ifname.split('e')
+         if intf[1]:
+             if int(intf[1]) >= 2:
+-                return 'eth' + str(int(intf[1]) - 2)
++                return 'eth' + str(int(intf[1]) - 1)
+             else:
+                 return 'eth' + str(intf[1])
