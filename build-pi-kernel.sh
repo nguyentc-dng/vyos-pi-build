@@ -25,7 +25,7 @@ echo "Build orther require kernel packages"
 
 # Copy built files
 echo "Copying built packages"
-find ${ROOTDIR}/vyos-build/scripts/package-build/linux-kernel/ -type f -name '*.deb' | grep -e 'accel-ppp-ng_' -e 'linux-' -e 'vyos-' -e 'nat-rtsp_' -e 'openvpn-dco_' -e 'jool_' | xargs -I {} cp {} ${ROOTDIR}/packages/
+find . -type f -name '*.deb' | grep -e 'accel-ppp-ng_' -e 'linux-' -e 'vyos-' -e 'nat-rtsp_' -e 'openvpn-dco_' -e 'jool_' | xargs -I {} cp {} ${ROOTDIR}/packages/
 
 # Clean
 rm -rf linux/ linux-firmware/ accel-ppp-ng/ ovpn-dco/ nat-rtsp/ jool/ realtek-r8152/ realtek-r8126/ ipt-netflow/
