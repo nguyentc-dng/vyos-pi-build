@@ -281,7 +281,7 @@ index 40668793e..985db96dd 100755
  def annotate_list(images_list: list[str]) -> list[str]:
      """Annotate list of images with additional info
 diff --git a/src/udev/vyos_net_name b/src/udev/vyos_net_name
-index 6ad7af2d6..48e29bf8e 100755
+index 6ad7af2d6..7a02e533b 100755
 --- a/src/udev/vyos_net_name
 +++ b/src/udev/vyos_net_name
 @@ -37,7 +37,7 @@ config_path = '/opt/vyatta/etc/config/config.boot'
@@ -293,21 +293,31 @@ index 6ad7af2d6..48e29bf8e 100755
          return False
      return True
  
-@@ -53,7 +53,7 @@ def find_available(intfs: dict, prefix: str) -> str:
-     if missing:
-         return f'{prefix}{missing[0]}'
+@@ -212,6 +212,11 @@ def on_boot_event(intf_name: str, hwid: str, predefined: str = '') -> str:
+     """Called on boot by vyos-router: 'coldplug' in vyatta_net_name"""
+     logger.info(f'lookup {intf_name}, {hwid}')
+     interfaces = get_configfile_interfaces()
++    if "eth0" in interfaces.values():
++        k = next(k for k,v in interfaces.items() if v == "eth0")
++        interfaces["00:00:00:00:00:00"] = interfaces.pop(k)
++    else:
++        interfaces["00:00:00:00:00:00"] = "eth0"
+     logger.debug(f'config file interfaces are {interfaces}')
  
--    return f'{prefix}{len(index_list)}'
-+    return f'{prefix}{len(index_list)+1}'
+     if hwid in list(interfaces):
+@@ -265,12 +270,9 @@ if __name__ == '__main__':
+     # Wait 60 seconds for other running scripts to finish
+     lock.acquire(60)
  
+-    if not boot_configuration_complete():
+-        res = on_boot_event(argv[1], argv[2], predefined=predef_name)
+-        logger.debug(f'on boot, returned name is {res}')
+-        print(res)
+-    else:
+-        logger.debug('boot configuration complete')
++    res = on_boot_event(argv[1], argv[2], predefined=predef_name)
++    logger.debug(f'on boot, returned name is {res}')
++    print(res)
  
- def mod_ifname(ifname: str) -> str:
-@@ -62,7 +62,7 @@ def mod_ifname(ifname: str) -> str:
-         intf = ifname.split('e')
-         if intf[1]:
-             if int(intf[1]) >= 2:
--                return 'eth' + str(int(intf[1]) - 2)
-+                return 'eth' + str(int(intf[1]) - 1)
-             else:
-                 return 'eth' + str(intf[1])
- 
+     lock.release()
+     logger.debug('Finished')
