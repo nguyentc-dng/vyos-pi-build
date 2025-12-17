@@ -51,6 +51,8 @@ echo "Patch vyos-build scripts"
 cp ${ROOTDIR}/patches/vyos-build/config.boot.default ./data/live-build-config/includes.chroot/opt/vyatta/etc/config.boot.default
 cp ${ROOTDIR}/patches/vyos-build/rpi4.toml ./data/build-flavors/rpi4.toml
 cp ${ROOTDIR}/patches/vyos-build/arm64.toml ./data/architectures/arm64.toml
+cp ${ROOTDIR}/patches/vyos-build/045-hook-live-config.sh ./data/live-build-config/hooks/045-hook-live-config.chroot
+chmod +x ./data/live-build-config/hooks/045-hook-live-config.chroot
 
 # Clone u-boot repository
 cd ${ROOTDIR}
