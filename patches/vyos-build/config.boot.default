@@ -33,7 +33,7 @@ system {
 interfaces {
     loopback lo {
     }
-    ethernet eth1 {
+    ethernet ens0 {
         address dhcp
     }
 }
