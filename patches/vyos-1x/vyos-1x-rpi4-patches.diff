@@ -281,11 +281,11 @@ index 40668793e..985db96dd 100755
  def annotate_list(images_list: list[str]) -> list[str]:
      """Annotate list of images with additional info
 diff --git a/src/udev/vyos_net_name b/src/udev/vyos_net_name
-index 6ad7af2d6..aacfd9cdb 100755
+index 6ad7af2d6..8d023f25b 100755
 --- a/src/udev/vyos_net_name
 +++ b/src/udev/vyos_net_name
-@@ -58,8 +58,8 @@ def find_available(intfs: dict, prefix: str) -> str:
- 
+@@ -58,13 +58,13 @@ def find_available(intfs: dict, prefix: str) -> str:
+
  def mod_ifname(ifname: str) -> str:
      """Check interface with names eX and return ifname on the next format eth{ifindex} - 2"""
 -    if re.match('^e[0-9]+$', ifname):
@@ -294,11 +294,18 @@ index 6ad7af2d6..aacfd9cdb 100755
 +        intf = ifname.split('eth' if 'eth' in ifname else 'e')
          if intf[1]:
              if int(intf[1]) >= 2:
-                 return 'eth' + str(int(intf[1]) - 2)
+-                return 'eth' + str(int(intf[1]) - 2)
++                return 'ens' + str(int(intf[1]) - 2)
+             else:
+-                return 'eth' + str(intf[1])
++                return 'ens' + str(intf[1])
+
+     return ifname
+
 @@ -265,12 +265,9 @@ if __name__ == '__main__':
      # Wait 60 seconds for other running scripts to finish
      lock.acquire(60)
- 
+
 -    if not boot_configuration_complete():
 -        res = on_boot_event(argv[1], argv[2], predefined=predef_name)
 -        logger.debug(f'on boot, returned name is {res}')
@@ -308,7 +315,7 @@ index 6ad7af2d6..aacfd9cdb 100755
 +    res = on_boot_event(argv[1], argv[2], predefined=predef_name)
 +    logger.debug(f'on boot, returned name is {res}')
 +    print(res)
- 
+
      lock.release()
      logger.debug('Finished')
 diff --git a/src/etc/netplug/netplugd.conf b/src/etc/netplug/netplugd.conf
